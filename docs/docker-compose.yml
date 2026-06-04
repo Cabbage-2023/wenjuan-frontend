@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: wenjuan-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+    container_name: wenjuan-backend
+    ports:
+      - "3005:3005"
+    depends_on:
+      - mongo
+    env_file:
+      - ./backend/.env
+    restart: always
+
+  client-c:
+    build:
+      context: ./client-c
+    container_name: wenjuan-client-c
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./client-c/.env
+    restart: always
+
+  client-b:
+    build:
+      context: ./frontend-b
+    container_name: wenjuan-client-b
+    ports:
+      - "3001:3001"
+      - "3002:3002"
+    depends_on:
+      - backend
+    env_file:
+      - ./frontend-b/.env.production
+    volumes:
+      - /home/ubuntu/www/airbnb:/usr/share/nginx/airbnb
+    restart: always
+
+volumes:
+  mongo_data:
